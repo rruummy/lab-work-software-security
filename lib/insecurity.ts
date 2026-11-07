@@ -54,12 +54,9 @@ export const denyAll = () => expressJwt({ secret: 'forbidden', algorithms: ['RS2
 export const authorize = (user = {}) => jwt.sign(user, privateKey, { expiresIn: '6h', algorithm: 'RS256' })
 export const verify = (token: string) => {
   if (!token) return false
-  try {
-    jwt.verify(token, publicKey, { algorithms: ['RS256'] })
-    return true
-  } catch {
-    return false
-  }
+  const decoded = jws.decode(token)
+  if (decoded?.header?.alg !== 'RS256') return false
+  return (jws.verify as ((token: string, secret: string) => boolean))(token, publicKey)
 }
 export const decode = (token: string) => { return jws.decode(token)?.payload }
 
